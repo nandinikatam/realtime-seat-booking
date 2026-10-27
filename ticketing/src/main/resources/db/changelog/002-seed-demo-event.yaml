@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-seed-demo-event
+      author: siva
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO events (name, venue, event_time)
+              VALUES ('Midnight Jazz Night', 'Blue Room Club', NOW() + INTERVAL '30 days');
+
+              INSERT INTO seats (event_id, row_label, seat_number, price, status)
+              SELECT (SELECT id FROM events WHERE name = 'Midnight Jazz Night'),
+                     r.label, n, 500.00, 'AVAILABLE'
+              FROM (VALUES ('A'), ('B'), ('C'), ('D'), ('E')) AS r(label),
+                   generate_series(1, 10) AS n;

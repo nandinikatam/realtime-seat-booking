@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Live seat updates</title>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+</head>
+<body style="font-family: sans-serif">
+<h2>Live seat updates (event 1)</h2>
+<p id="status">Connecting...</p>
+<ul id="log"></ul>
+
+<script>
+    const client = new StompJs.Client({ brokerURL: 'ws://localhost:8080/ws' });
+
+    client.onConnect = () => {
+        document.getElementById('status').textContent = 'Connected';
+        client.subscribe('/topic/events/1/seats', (msg) => {
+            const seat = JSON.parse(msg.body);
+            const li = document.createElement('li');
+            li.textContent = new Date().toLocaleTimeString() + ' - Seat '
+                + seat.rowLabel + seat.seatNumber + ' is now ' + seat.status;
+            document.getElementById('log').prepend(li);
+        });
+    };
+
+    client.onStompError = (frame) => {
+        document.getElementById('status').textContent = 'Error: ' + frame.headers['message'];
+    };
+
+    client.activate();
+</script>
+</body>
+</html>
